@@ -3,7 +3,7 @@
 #include <cmath>
 #include <assert.h>
 
-const DWORD MeshPlane::Vertex::FVF = D3DFVF_XYZ | D3DFVF_DIFFUSE;
+const DWORD MeshPlane::Vertex::FVF = D3DFVF_XYZ | D3DFVF_NORMAL;
 
 MeshPlane::MeshPlane(IDirect3DDevice9* device,
 				 const char* heightmapFileName,
@@ -24,8 +24,7 @@ MeshPlane::MeshPlane(IDirect3DDevice9* device,
 	
 	if (meshType == OCEAN) {
 		assert(_numVertsPerCol == _numVertsPerRow);
-		_numVertsPerRow++;
-		_numVertsPerCol++;	// plus one for tiling purpose
+		assert((_numVertsPerRow & (_numVertsPerRow - 1)) == 0);
 	}
 
 	_numCellsPerRow = _numVertsPerRow - 1;
@@ -122,7 +121,7 @@ bool MeshPlane::computeVertices()
 				(float)x,
 				(float)_heightmap[index],
 				(float)z,
-				d3d::WHITE);
+				0, 0, 0);
 
 			j++; // next column
 		}
@@ -200,18 +199,23 @@ bool MeshPlane::readRawFile(const char* fileName)	// RAW file dimensions must be
 
 void MeshPlane::updateVertices(float t)
 {
-	_oceanMesh->evaluateWavesFFT(t);
+#if defined(EVAL_CPUFFT)
+	_oceanMesh->evalWavesCPUFFT(t);
+	//_oceanMesh->evaluateWavesFFT(t);
+#elif defined(EVAL_GPUFFT)
+	_oceanMesh->evalWavesGPUFFT(t);
+#endif
 
-#ifdef DEBUGFFT
+#ifdef DEBUGHTILDE0
 	_oceanMesh->dispHeightToFile();
 #endif
 
 #ifdef DEBUGH
-	FILE* f = fopen("C:\\Users\\Vancas\\Desktop\\h.txt", "w");
+	FILE* f = fopen(HEIGHT_FILE, "w");
 	Vertex* v = 0;
 	_vb->Lock(0, 0, (void**)&v, 0);
 
-	int nVerts = _oceanMesh->Nplus1;
+	int nVerts = _oceanMesh->N;
 	for (int i = 0; i < nVerts; i++) {
 		for (int j = 0; j < nVerts; j++) {	
 			int index = i * nVerts + j;
@@ -228,16 +232,12 @@ void MeshPlane::updateVertices(float t)
 	Vertex* v = 0;
 	_vb->Lock(0, 0, (void**)&v, 0);
 
-	int nVerts = _oceanMesh->Nplus1;
+	int nVerts = _oceanMesh->N;
 	for (int i = 0; i < nVerts; i++) {
 		for (int j = 0; j < nVerts; j++) {
 			int index = i * nVerts + j;
 			Ocean::Vertex vto = _oceanMesh->vertices[index];
-#ifdef XYFACTOR
-			v[index] = Vertex(vto.x * XYFACTOR, vto.y, vto.z * XYFACTOR, d3d::WHITE);
-#else
-			v[index] = Vertex(vto.x, vto.y, vto.z, d3d::WHITE);
-#endif
+			v[index] = Vertex(vto.x, vto.y * HEIGHTSCALE, vto.z, vto.nx, vto.ny, vto.nz);
 		}
 	}
 }
@@ -255,11 +255,7 @@ bool MeshPlane::draw(D3DXMATRIX* world, float t)
 		_device->SetStreamSource(0, _vb, 0, sizeof(Vertex));
 		_device->SetFVF(Vertex::FVF);
 		_device->SetIndices(_ib);
-		//_device->SetTexture(0, _tex);
-
-		_device->SetRenderState(D3DRS_LIGHTING, false);
-		_device->SetRenderState(D3DRS_FILLMODE, D3DFILL_WIREFRAME);
-		_device->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+	
 		
 		if (_meshType == OCEAN) {
 #ifdef DSTATIC

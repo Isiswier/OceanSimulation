@@ -1,7 +1,12 @@
 #include "font.h"
 
-bool CFont::Init()
+bool CFont::Init(float dispA, float dispWindX, float dispWindY)
 {
+	A = dispA;
+	windX = dispWindX;
+	windY = dispWindY;
+	rect = { 20, 20, 400, 200 };
+
 	D3DXFONT_DESC df;
 	ZeroMemory(&df, sizeof(D3DXFONT_DESC));
 	df.Height = 16;
@@ -21,12 +26,6 @@ bool CFont::Init()
 	return true;
 }
 
-void CFont::Draw(const char* str)
-{
-	RECT rect = {20, 20, 400, 200};
-	m_font->DrawTextA(NULL, str, -1, &rect, DT_TOP | DT_LEFT, d3d::YELLOW);
-}
-
 void CFont::InfoFPS(float t)
 {	
 	frames++;
@@ -38,6 +37,5 @@ void CFont::InfoFPS(float t)
 		frameTime = 0;
 	}
 
-	sprintf(buff, "FPS:     %f", FPS);
-	Draw(buff);
+	dispInfo();
 }

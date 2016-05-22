@@ -2,23 +2,46 @@
 #define _FFT_H
 
 #include <cmath>
-#include "complex.h"
+#include "misc.h"
+#include "defs.h"
 
-class cFFT {
-  private:
-	unsigned int N, which;
-	unsigned int log_2_N;
-	float pi2;
-	unsigned int *reversed;
-	complex **T;
-	complex *c[2];
-  protected:
-  public:
-	cFFT(unsigned int N);
-	~cFFT();
-	unsigned int reverse(unsigned int i);
-	complex t(unsigned int x, unsigned int N);
-	void fft(complex* input, complex* output, int stride, int offset);
+typedef unsigned int UINT;
+
+/*************************************
+ * We suppose that rows == cols == N
+ *************************************
+ */
+
+class FFT {
+public:
+	FFT(UINT N);
+	~FFT();
+
+	inline UINT reverse(UINT x) {
+		UINT n = 0;
+		for (int i = 0; i < log2N; i++) {
+			n <<= 1;
+			n |= (x & 1);
+			x >>= 1;
+		}
+		return n;
+	}
+
+	void cpufft2(complex* in);
+	void gpufft2(complex* in);
+
+
+private:
+	UINT	N;
+	UINT	log2N;
+	UINT	memSize;
+
+	complex*	  temp = 0;
+	cufftHandle   plan;
+	cufftComplex* deviceData;
+
+	void fftRow(complex* in);
+	void fftCol(complex* in);
 };
 
 #endif

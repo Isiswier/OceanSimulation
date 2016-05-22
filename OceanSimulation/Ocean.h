@@ -15,12 +15,6 @@ public:
 		float  ox, oy, oz;	// original position
 	};
 
-	struct HDNinfo {
-		complex h;			// wave height
-		vector2 D;			// displacement
-		vector3 n;			// normal
-	};
-
 	struct OceanPara {
 		OceanPara(float inA = 0.004f, vector2 inW = vector2(20.0f, 20.0f)) {
 			A = inA;	w = inW;
@@ -32,22 +26,22 @@ public:
 	Ocean(int N, float A, vector2 w, float length);
 	~Ocean();
 	
-	void dispHeightToFile();
-	void evaluateWaves(float t);
+	void dispHtildeToFile();
 	void evaluateWavesFFT(float t);
+	void evalWavesCPUFFT(float t);
+	void evalWavesGPUFFT(float t);
 
-	float dispersion(int n_prime, int m_prime);
-	float phillips  (int n_prime, int m_prime);
+	float dispersion(int col, int row);
+	float phillips  (int col, int row);
 	
-	complex hTilde_0(int n_prime, int m_prime);
-	complex hTilde  (float t, int n_prime, int m_prime);
-	HDNinfo h_D_and_n(vector2 x, float t);
+	complex hTilde_0(int col, int row);
+	complex hTilde  (float t, int col, int row);
 
 private:
 	friend class MeshPlane;						// MeshPlane accesses Ocean::vertices
 	const float g;
 	
-	int			N, Nplus1;	                    // dimension -- N should be a power of 2
+	int			N;			                    // dimension -- N should be a power of 2
 	float		A, length;                      // A: phillips spectrum parameter -- affects heights of waves
 	vector2		w;                              // wind paramete
 	complex		*h_tilde = 0,                   // for fast fourier transform
@@ -55,7 +49,7 @@ private:
 				*h_tilde_slopez = 0,
 				*h_tilde_dx = 0,
 				*h_tilde_dz = 0;
-	cFFT		*fft = 0;
+	FFT			*mfft = 0;
 
 	Vertex		 *vertices = 0;	
 };

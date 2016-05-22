@@ -51,17 +51,31 @@ private:
 	bool  computeIndices();
 	void  updateVertices(float t);
 
+	//struct Vertex
+	//{
+	//	Vertex(){}
+
+	//	Vertex(float x, float y, float z, D3DCOLOR c) {
+	//		_x = x; _y = y; _z = z;
+	//		color = c;
+	//	}
+
+	//	float _x, _y, _z;
+	//	D3DCOLOR color;
+	//	static const DWORD FVF;
+	//};
+
 	struct Vertex
 	{
 		Vertex(){}
 
-		Vertex(float x, float y, float z, D3DCOLOR c) {
+		Vertex(float x, float y, float z, float nx, float ny, float nz) {
 			_x = x; _y = y; _z = z;
-			color = c;
+			_nx = nx; _ny = ny; _nz = nz;
 		}
 
 		float _x, _y, _z;
-		D3DCOLOR color;
+		float _nx, _ny, _nz;
 		static const DWORD FVF;
 	};
 };

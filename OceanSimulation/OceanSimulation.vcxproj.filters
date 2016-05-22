@@ -27,16 +27,7 @@
     <ClCompile Include="Ocean.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="complex.cc">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="fft.cc">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="misc.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="vector.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="simulator.cpp">
@@ -46,6 +37,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="font.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="fft.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="complex.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="vector.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -83,5 +83,8 @@
     <ClInclude Include="defs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="gpufft.cu" />
   </ItemGroup>
 </Project>
